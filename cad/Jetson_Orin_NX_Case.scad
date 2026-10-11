@@ -45,6 +45,12 @@ io_h = 40;
 board_z = 45;
 io_z0 = board_z - io_h + wall;
 
+// --- WiFi antenna holes (-X wall, opposite IO) ---
+// 6mm clearance for SMA-style antenna connectors (M6 thread / 6mm cable gland).
+ant_d = 6;
+ant_y = 60;          // both antennas on the wall centerline
+ant_z = [20, 60];     // two heights: low + high
+
 // --- Lekiwi mounting M3 grid (FRONT wall Y=0) ---
 m3_d = 3.2;
 m3_pitch = 20;
@@ -122,6 +128,11 @@ module base() {
         // IO opening
         translate([ix + wall - 0.1, oy/2 - io_w/2, io_z0])
             cube([wall + 0.2, io_w, io_h]);
+        // WiFi antenna holes (-X wall)
+        for (z = ant_z) {
+            translate([-0.1, ant_y, z]) rotate([0, 90, 0])
+                cylinder(d = ant_d, h = wall + 0.2, $fn = 32);
+        }
         // Lekiwi M3 grid (front wall)
         for (x = [10:m3_pitch:ox-10]) for (z = [10:m3_pitch:oz-10]) {
             translate([x, -0.1, z]) rotate([-90,0,0]) cylinder(d = m3_d, h = wall + 0.2, $fn = 24);
