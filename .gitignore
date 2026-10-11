@@ -1,0 +1,23 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+
+# Build outputs (large STL files - keep out of git)
+out_*/
+*.stl
+*.gcode
+*.3mf
+
+# Keep rendered comparison dir ignored (regenerable)
+rc/
+
+# OpenSCAD backup/cache
+*.bak
+*.tmp
+
+# Editor
+.vscode/
+.idea/
