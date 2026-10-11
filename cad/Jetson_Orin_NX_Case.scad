@@ -53,15 +53,17 @@ m3_pitch = 20;
 skirt_t = 2.5;
 skirt_h = 8;
 fit_clear = 0.2;
-screw_z = iz + wall - skirt_h/2;
+// screw axis = center of the skirt (z=oz-skirt_h .. oz), fully enclosed
+screw_z = iz + 2*wall - skirt_h/2;
 screw_d = 3.2;
 pilot_d = 2.5;
 boss_depth = 4;
 boss_w = 8;
 
-// --- Footings ---
+// --- Footings (on the +Y "standing" side; protrude past the skirt so the
+// case stands on the feet, not the skirt edge) ---
 foot_s = 8;
-foot_h = 1;
+foot_h = skirt_t + 0.5;   // protrude 0.5mm beyond the skirt outer
 
 // --- Ventilation ---
 vd = 4;
@@ -111,11 +113,11 @@ module base() {
             translate([80-boss_w/2, iy+wall-boss_depth, screw_z-boss_w/2]) cube([boss_w, boss_depth, boss_w]);
             translate([wall, 40-boss_w/2, screw_z-boss_w/2]) cube([boss_depth, boss_w, boss_w]);
             translate([wall, 80-boss_w/2, screw_z-boss_w/2]) cube([boss_depth, boss_w, boss_w]);
-            // 4 thin feet
+            // 4 feet on the +Y standing side; top pair sits BELOW the skirt
             translate([5, oy, 5]) cube([foot_s, foot_h, foot_s]);
             translate([ox-5-foot_s, oy, 5]) cube([foot_s, foot_h, foot_s]);
-            translate([5, oy, oz-5-foot_s]) cube([foot_s, foot_h, foot_s]);
-            translate([ox-5-foot_s, oy, oz-5-foot_s]) cube([foot_s, foot_h, foot_s]);
+            translate([5, oy, oz - skirt_h - foot_s - 1]) cube([foot_s, foot_h, foot_s]);
+            translate([ox-5-foot_s, oy, oz - skirt_h - foot_s - 1]) cube([foot_s, foot_h, foot_s]);
         }
         // IO opening
         translate([ix + wall - 0.1, oy/2 - io_w/2, io_z0])
@@ -148,16 +150,20 @@ module base() {
 }
 
 module cover() {
+    // Cover sits ON TOP of the base (plate bottom at z=oz), skirt hangs below.
+    // This keeps the skirt screws at z=screw_z aligned with the base screw pilots.
     difference() {
         union() {
-            translate([0, 0, iz + wall]) linear_extrude(wall) rrect(ox, oy, corner_r);
-            translate([-skirt_t, -skirt_t, iz + wall - skirt_h])
+            // top plate: sized to the skirt outer so it overlaps the skirt ring (no gap)
+            translate([-skirt_t, -skirt_t, oz])
+                linear_extrude(wall) rrect(ox + 2*skirt_t, oy + 2*skirt_t, corner_r + skirt_t);
+            translate([-skirt_t, -skirt_t, oz - skirt_h])
                 linear_extrude(skirt_h) rrect(ox + 2*skirt_t, oy + 2*skirt_t, corner_r + skirt_t);
         }
-        translate([-fit_clear, -fit_clear, iz + wall - skirt_h - 0.1])
+        translate([-fit_clear, -fit_clear, oz - skirt_h - 0.1])
             linear_extrude(skirt_h + 0.2) rrect(ox + 2*fit_clear, oy + 2*fit_clear, corner_r + fit_clear);
         for (y = [15:vp:oy-15]) {
-            translate([ox/2 - slot_w/2, y, iz + wall - 0.1]) cube([slot_w, slot_h, wall + 0.2]);
+            translate([ox/2 - slot_w/2, y, oz - 0.1]) cube([slot_w, slot_h, wall + 0.2]);
         }
         translate([40, oy+fit_clear-0.1, screw_z]) rotate([-90,0,0]) cylinder(d = screw_d, h = skirt_t-fit_clear+0.3, $fn = 24);
         translate([80, oy+fit_clear-0.1, screw_z]) rotate([-90,0,0]) cylinder(d = screw_d, h = skirt_t-fit_clear+0.3, $fn = 24);
@@ -166,9 +172,16 @@ module cover() {
     }
 }
 
+// Print-oriented cover: flipped so the top plate sits on the bed and the
+// skirt points up. This avoids a 125mm bridge across the open interior.
+module cover_print() {
+    translate([0, 0, oz + wall]) mirror([0, 0, 1]) cover();
+}
+
 part = "both";
 if (part == "base") base();
-if (part == "cover") cover();
+if (part == "cover") cover_print();
+if (part == "cover_design") cover();
 if (part == "both") {
     base();
     translate([0, oy + 15, 0]) cover();
