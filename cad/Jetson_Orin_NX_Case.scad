@@ -19,8 +19,8 @@ corner_r = 3;
 
 // --- Mounting pillars ---
 hs = 102;          // pillar centre-to-centre spacing (tightened 3mm)
-pillar_w = 12;     // pillar BOTTOM cross-section (full width)
-slim_w = 8;        // pillar TOP cross-section (slimmed, clears components)
+pillar_w = 12;     // pillar BOTTOM cross-section (full width, square)
+slim_w = 7.5;      // pillar TOP cross-section (round, slimmed to clear board components)
 slim_h = 18;       // slimmed section height (top 1.8cm)
 pillar_h = 30;     // pillar total height (3cm)
 shift_x = 3;       // shift pillars toward IO side (+X)
@@ -86,9 +86,9 @@ module pillar(x, y) {
             // bottom section (full width, strong)
             translate([cx - pillar_w/2, cy - pillar_w/2, wall])
                 cube([pillar_w, pillar_w, pillar_h - slim_h]);
-            // top section (slimmed, centred -> clears components on the inner sides)
-            translate([cx - slim_w/2, cy - slim_w/2, wall + pillar_h - slim_h])
-                cube([slim_w, slim_w, slim_h]);
+            // top section (round, slimmed -> clears components on the bottom of the board)
+            translate([cx, cy, wall + pillar_h - slim_h])
+                cylinder(d = slim_w, h = slim_h, $fn = 32);
         }
         // deep hex recess (subtracted hole for the long M3 hex column)
         translate([cx, cy, wall + pillar_h - hex_depth + 0.1])
