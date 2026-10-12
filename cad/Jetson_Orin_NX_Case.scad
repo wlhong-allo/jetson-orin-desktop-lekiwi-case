@@ -177,16 +177,17 @@ module cover() {
             translate([ox/2 - slot_w/2, y, oz - 0.1]) cube([slot_w, slot_h, wall + 0.2]);
         }
         // screw holes on 2 skirt walls ONLY: -Y and -X.
-        // The cover is printed flipped (mirror Z). When the user flips it back
-        // to assemble (180deg around X), points mirror around the cover
-        // center (62.5): y -> 125-y. So holes designed at 85,45 land on
-        // 40,80 after the flip, matching the base's +Y and -X screw pilots.
-        // (Base pilots are at 40,80 — centered at 60, NOT at the cover center 62.5,
-        // so we must pre-mirror the cover holes to 85,45 to compensate.)
-        // -Y wall: holes at x=85, 45  (mirror of 40,80 around 62.5)
-        translate([85, -skirt_t-0.1, screw_z]) rotate([-90,0,0]) cylinder(d = screw_d, h = skirt_t+0.2, $fn = 24);
-        translate([45, -skirt_t-0.1, screw_z]) rotate([-90,0,0]) cylinder(d = screw_d, h = skirt_t+0.2, $fn = 24);
-        // -X wall: holes at y=85, 45  (mirror of 40,80 around 62.5)
+        // The cover is printed flipped (mirror Z). The user flips it back to
+        // assemble with a 180deg rotation around X (front-to-back): +Y<->-Y
+        // swap, -X stays -X, and y mirrors around the cover center (62.5):
+        //   y -> 125 - y.
+        // -Y wall holes: x=40,80 stay at x=40,80 after the flip (x unchanged) -> +Y wall. OK.
+        // -X wall holes: y=40,80 would land at y=85,45 (wrong). So we
+        //   pre-mirror them to y=85,45 -> they land at y=40,80 after flip. OK.
+        // -Y wall: holes at x=40, 80
+        translate([40, -skirt_t-0.1, screw_z]) rotate([-90,0,0]) cylinder(d = screw_d, h = skirt_t+0.2, $fn = 24);
+        translate([80, -skirt_t-0.1, screw_z]) rotate([-90,0,0]) cylinder(d = screw_d, h = skirt_t+0.2, $fn = 24);
+        // -X wall: holes at y=85, 45 (pre-mirrored; land at y=40,80 after flip)
         translate([-skirt_t-0.1, 85, screw_z]) rotate([0,90,0]) cylinder(d = screw_d, h = skirt_t+0.2, $fn = 24);
         translate([-skirt_t-0.1, 45, screw_z]) rotate([0,90,0]) cylinder(d = screw_d, h = skirt_t+0.2, $fn = 24);
     }
